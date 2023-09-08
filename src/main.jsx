@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client'
 import {BrowserRouter, Routes, Route} from 'react-router-dom'
 import {Link,Navigate, useNavigate} from 'react-router-dom'
 import {useParams} from 'react-router-dom'
+import {Outlet} from 'react-router-dom'
 import axios from 'axios'
 import './index.css'
 
@@ -89,29 +90,49 @@ function NotFoundPage () {
   return <div className='App'>404 Not Found</div>
 }
 
+function AppLayout () {
+  return (
+    <>
+    <div>
+      <Link to="/">Home</Link>
+      <Link to="/profile">Profile</Link>
+      <Link to="/profile/5">friend</Link>
+      <Link to="/feed">Feed</Link>
+
+    </div>
+    <>
+    <Outlet/>
+    </>
+    </>
+  )
+}
 
 /* เอา ReactDOM.createRoot(document.getElementById('root')).render
 มาเก็บไว้ในตัวแปร root */
 
 const root = ReactDOM.createRoot(document.getElementById('root'))
 root.render(
-  <BrowserRouter>
-  <Link to="/">Home</Link>
-  <Link to="/profile">Profile</Link>
-  <Link to="/profile/5">friend</Link>
-  <Link to="/feed">Feed</Link>
 
-  <Routes>
-<Route path="/" element={<HomePage/>}/>
-<Route path="/profile" element={<ProfilePage/>}/>
+  
+  <BrowserRouter>
+<Routes>
+  {/* Parent */}
+  <Route path='/' element={<AppLayout/>}>
+
+    {/* Child: <Outlet/> */}
+    <Route path='' element={<HomePage/>}/>
+    <Route path='profile' element={<ProfilePage/>}/>
 <Route path="/profile/:id" element={<FriendPage/>}/>
 <Route path="/feed" element={<FeedPage/>}/>
 <Route path="*" element={<Navigate to='/'/>}/>
+{/* path="*" หมายถึงว่าแทน path ใดๆ ที่นอกเหนือจากนี้ */}
+  </Route>
+</Routes>
+</BrowserRouter>
 
-
-  </Routes>
-  </BrowserRouter>
 )
-
 //npm i react-router-dom
 //npm i axios
+
+
+
