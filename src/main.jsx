@@ -1,6 +1,7 @@
-import React, { useState, createContext, useContext, useEffect } from 'react';
+import React, { useState, createContext, useContext } from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
+import axios from 'axios';
 // สร้าง <AuthContext/> สำหรับ Provide isAuth,handleAuth ให้ <App/>
 
 const AuthContext = createContext();
@@ -10,44 +11,47 @@ const AuthContext = createContext();
 // }
 
 function AuthContextProvider({ children }) {
-  const [isAuth, setIsAuth] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [user, setUser] = useState({ name: 'Guest' });
+  const [isAuth, setIsAuth] = useState(false);
 
-  // isAuth : false => true ให้ deley 1 วิ
-  // useEffect(() => {
-  //   if (isLoading) {
-  //     setTimeout(() => {
-  //       setIsLoading(false);
-  //     }, 3000);
-  //   }
-  // }, [isLoading]);
-
-  const handleAuth = () => {
-    // login : isAuth : false => true
-    if (!isAuth) {
-      setIsLoading(true);
-      setTimeout(() => {
-        setIsAuth(true);
-        setIsLoading(false);
-      }, 3000);
-    } else {
+  const handleAuth = async () => {
+    //Logout
+    if (isAuth) {
       setIsAuth(false);
+      setUser({ name: 'Guest' });
+      return;
+    }
+
+    // Login
+    try {
+      setIsLoading(true);
+      const response = await axios.get('https://jsonplaceholder.typicode.com/users/1');
+      console.log(response.data);
+      setUser(response.data);
+      setIsAuth(true);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 1000);
     }
   };
 
   // const shareObj = { isAuth, handleAuth };
   return (
-    <AuthContext.Provider value={{ isAuth, handleAuth, isLoading }}>
+    <AuthContext.Provider value={{ isAuth, handleAuth, isLoading, user }}>
       {children}
     </AuthContext.Provider>
   );
 }
 
 function App() {
-  const { isAuth, handleAuth, isLoading } = useContext(AuthContext);
+  const { isAuth, handleAuth, isLoading, user } = useContext(AuthContext);
   return (
     <div className='App'>
-      {isLoading ? <h1>Loading...</h1> : <h1>Welcome.. {!isAuth ? 'Guest' : 'User'} </h1>}
+      {isLoading ? <h1>Loding...</h1> : <h1>Welcome.. {!isAuth ? 'Guest' : user?.name} </h1>}
       <button onClick={handleAuth} disabled={isLoading}>
         {!isAuth ? 'Login' : 'Logout'}
       </button>
